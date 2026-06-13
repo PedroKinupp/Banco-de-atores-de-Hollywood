@@ -1,2 +1,5 @@
 testes
 TARVBM
+*.bin
+*.exe
+TARVBM_bin/ARVORE
