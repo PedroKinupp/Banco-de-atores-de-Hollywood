@@ -1,0 +1,51 @@
+#ifndef TARVBM_BIN_H
+#define TARVBM_BIN_H
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int OFFSET;
+
+#define MAX_TAM_NOME 32
+#define MAX_NOME_ARQ 32
+#define MAX_TAM_CHAVE 100
+
+typedef struct no_bin {
+    OFFSET offset;
+    int nchaves;
+    int folha;
+
+    char **chave;
+    OFFSET *offset_filhos;
+
+    char *folha_nome;
+    char *prox_folha_nome;
+} NO_BIN;
+
+typedef struct {
+    FILE *arquivo;
+    char *nome_arquivo;
+    int t;
+    long raiz_offset;
+} TARVBM_BIN;
+
+void escrever_dados_arquivo(NO_BIN *no, int t);
+void gerar_nome_folha(OFFSET offset, char *saida);
+NO_BIN *ler_folha_arquivo(const char *nome, int t);
+void destruir_no(NO_BIN *no, int t);
+
+#endif
+
+// Operações básicas
+TARVBM_BIN* TARVBM_BIN_criar(const char *nome_arquivo, int t);
+TARVBM_BIN* TARVBM_BIN_abrir(const char *nome_arquivo);
+void TARVBM_BIN_fechar(TARVBM_BIN *arvore);
+
+// Operações de árvore
+OFFSET TARVBM_BIN_busca(TARVBM_BIN *arvore, const char *chave);
+void TARVBM_BIN_insere(TARVBM_BIN *arvore, const char *chave);
+void TARVBM_BIN_remove(TARVBM_BIN *arvore, char *chave);
+
+// Utilitários
+void TARVBM_BIN_imprime(TARVBM_BIN *arvore);
+void TARVBM_BIN_imprime_todos(TARVBM_BIN* avr);
+int TARVBM_num_folhas(TARVBM_BIN* arv);
