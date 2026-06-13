@@ -40,7 +40,7 @@ void escrever_no(FILE *arq, NO_BIN *no, int t) {
     for (i = 0; i < max_chaves; i++) {
         fwrite(no->chave[i], sizeof(char), MAX_TAM_CHAVE, arq);
     }
-
+    fwrite(no->offset_chaves, sizeof(OFFSET), 2 * t - 1, arq);
     fwrite(no->offset_filhos, sizeof(OFFSET), max_filhos, arq);
 }
 void liberar_no(NO_BIN *no, int t) {
@@ -54,7 +54,7 @@ void liberar_no(NO_BIN *no, int t) {
             }
             free(no->chave);
         }
-
+        free(no->offset_chaves);
         free(no->offset_filhos);
         free(no->folha_nome);
         free(no->prox_folha_nome);
@@ -77,6 +77,10 @@ NO_BIN* criar_no(long offset, int t, int folha) {
 
     for (i = 0; i < max_chaves; i++) {
         no->chave[i] = calloc(MAX_TAM_CHAVE, sizeof(char));
+    }
+    no->offset_chaves = malloc(sizeof(OFFSET) * (2 * t - 1));
+    for(int i = 0; i < 2 * t - 1; i++){
+        no->offset_chaves[i] = -1;
     }
     
     no->offset_filhos = malloc(max_filhos*sizeof(OFFSET));
@@ -102,6 +106,7 @@ NO_BIN* ler_no(FILE *arq, OFFSET offset, int t) {
     for (int i = 0; i < max_chaves; i++) {
         no->chave[i] = calloc(MAX_TAM_CHAVE, sizeof(char));
     }
+    no->offset_chaves = malloc(sizeof(OFFSET) * max_chaves);
     no->offset_filhos = (OFFSET*)malloc(sizeof(OFFSET) * (2*t));
     
     fseek(arq, offset, SEEK_SET);
@@ -112,6 +117,7 @@ NO_BIN* ler_no(FILE *arq, OFFSET offset, int t) {
     for (int i = 0; i < max_chaves; i++) {
         fread(no->chave[i], sizeof(char), MAX_TAM_CHAVE, arq);
     }
+    fread(no->offset_chaves, sizeof(OFFSET), max_chaves, arq);
     fread(no->offset_filhos, sizeof(OFFSET), 2*t, arq);
     
     return no;
@@ -130,6 +136,8 @@ void escrever_dados_arquivo(NO_BIN *no, int t){
     if (!f) return;
 
     fwrite(&no->nchaves, sizeof(int), 1, f);
+    fwrite(no->offset_chaves, sizeof(OFFSET), 2 * t - 1, f);
+    fwrite(no->prox_folha_nome, sizeof(char), MAX_TAM_NOME, f);
 
     for (int i = 0; i < no->nchaves; i++) {
         fwrite(no->chave[i], sizeof(char), MAX_TAM_CHAVE, f);
@@ -146,9 +154,10 @@ NO_BIN *ler_dados_folha(NO_BIN *folha_principal, int t){
     NO_BIN *no = criar_no(folha_principal->offset, t, 1);
 
     strcpy(no->folha_nome, folha_principal->folha_nome);
-    strcpy(no->prox_folha_nome, folha_principal->prox_folha_nome);
 
     fread(&no->nchaves, sizeof(int), 1, f);
+    fread(no->offset_chaves, sizeof(OFFSET), 2 * t - 1, f);
+    fread(no->prox_folha_nome, sizeof(char), MAX_TAM_NOME, f);
 
     for (int i = 0; i < no->nchaves; i++) {
         fread(no->chave[i], sizeof(char), MAX_TAM_CHAVE, f);
@@ -281,17 +290,26 @@ void dividir_filho(FILE *arq, NO_BIN *x, int i, OFFSET offset_filho, int t){
     }
     else{
         z->nchaves = t;
-        for(j=0;j < t;j++) {
-            strcpy(z->chave[j], y->chave[j+t-1]);
+
+        for(j = 0; j < t; j++) {
+            strcpy(z->chave[j], y->chave[j + t - 1]);
+            z->offset_chaves[j] = y->offset_chaves[j + t - 1];
+
+            y->offset_chaves[j + t - 1] = -1;
         }
+
         strcpy(z->prox_folha_nome, y->prox_folha_nome);
-        strcpy(y->prox_folha_nome,z->folha_nome);
+        strcpy(y->prox_folha_nome, z->folha_nome);
     }
     y->nchaves = t-1;
     for(j=x->nchaves; j>=i; j--) x->offset_filhos[j+1]=x->offset_filhos[j];
     x->offset_filhos[i] = novo_offset;
     for(j=x->nchaves; j>=i; j--) strcpy(x->chave[j],x->chave[j-1]);
-    strcpy(x->chave[i-1],y->chave[t-1]);
+    if (y->folha) {
+        strcpy(x->chave[i - 1], z->chave[0]);
+    } else {
+        strcpy(x->chave[i - 1], y->chave[t - 1]);
+    }
     x->nchaves++;
 
     escrever_no(arq, y, t);
@@ -301,15 +319,17 @@ void dividir_filho(FILE *arq, NO_BIN *x, int i, OFFSET offset_filho, int t){
     liberar_no(y, t);
     liberar_no(z, t);
 }
-void insere_nao_completo(FILE* arq, OFFSET offset, const char* chave, int t){
+void insere_nao_completo(FILE* arq, OFFSET offset, const char* chave, OFFSET offset_pessoa, int t){
     NO_BIN *x = ler_no(arq, offset, t);
     int i = x->nchaves - 1;
     if(x->folha){
         while((i>=0) && (strcmp(chave, x->chave[i]) < 0)){
             strcpy(x->chave[i+1], x->chave[i]);
+            x->offset_chaves[i + 1] = x->offset_chaves[i];
             i--;
         }
         strcpy(x->chave[i+1], chave);
+        x->offset_chaves[i + 1] = offset_pessoa;
         x->nchaves++;
 
         escrever_no(arq, x, t);
@@ -331,10 +351,10 @@ void insere_nao_completo(FILE* arq, OFFSET offset, const char* chave, int t){
 
     liberar_no(x, t);
 
-    insere_nao_completo(arq, prox, chave, t);
+    insere_nao_completo(arq, prox, chave, offset_pessoa, t);
 }
 
-void TARVBM_BIN_insere(TARVBM_BIN *arvore, const char *chave) {
+void TARVBM_BIN_insere(TARVBM_BIN *arvore, const char *chave, OFFSET offset_pessoa) {
     if (!arvore || !chave) return;
 
     if (arvore->raiz_offset == -1) {
@@ -342,6 +362,7 @@ void TARVBM_BIN_insere(TARVBM_BIN *arvore, const char *chave) {
         NO_BIN *nova_raiz = criar_no(novo_offset, arvore->t, 1);
 
         strcpy(nova_raiz->chave[0], chave);
+        nova_raiz->offset_chaves[0] = offset_pessoa;
         nova_raiz->nchaves = 1;
 
         arvore->raiz_offset = novo_offset;
@@ -373,10 +394,10 @@ void TARVBM_BIN_insere(TARVBM_BIN *arvore, const char *chave) {
         arvore->raiz_offset = novo_raiz_offset;
         escrever_metadata(arvore);
 
-        insere_nao_completo( arvore->arquivo, novo_raiz_offset, chave, arvore->t);
+        insere_nao_completo( arvore->arquivo, novo_raiz_offset, chave, offset_pessoa, arvore->t);
         liberar_no(nova_raiz, arvore->t);
     } else {
-        insere_nao_completo( arvore->arquivo, arvore->raiz_offset, chave, arvore->t);
+        insere_nao_completo( arvore->arquivo, arvore->raiz_offset, chave, offset_pessoa, arvore->t);
     }
 
     liberar_no(raiz, arvore->t);
@@ -428,6 +449,7 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
     if (!no) return -1;
 
     OFFSET prox_remocao = -1;
+    OFFSET pessoa_removida = -1;
     int destruir_y = 0;
     int i = 0;
     while (i < no->nchaves && strcmp(no->chave[i], chave) < 0) {
@@ -435,24 +457,27 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
     }
 
     if(no->folha){
+        pessoa_removida = -1;
         if(i < no->nchaves && strcmp(no->chave[i], chave) == 0){
+            pessoa_removida = no->offset_chaves[i];
             for(int j = i; j < no->nchaves - 1; j++){
-                strcpy(no->chave[j], no->chave[j+1]);
+                strcpy(no->chave[j], no->chave[j + 1]);
+                no->offset_chaves[j] = no->offset_chaves[j + 1];
             }
             no->nchaves--;
+            no->offset_chaves[no->nchaves] = -1;
 
             if (no->nchaves == 0 && no->offset == arv->raiz_offset) {
                 arv->raiz_offset = -1;
                 escrever_metadata(arv);
                 destruir_no(no, t);
-                return -1;
+                return pessoa_removida;
             }
 
             escrever_no(arv->arquivo, no, t);
         }
-        OFFSET ret = no->offset;
         liberar_no(no, t);
-        return ret;
+        return pessoa_removida;
     }
 
     if (i < no->nchaves && strcmp(chave, no->chave[i]) == 0) {
@@ -494,14 +519,20 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
             strcpy(no->chave[i], primeira_z);
         } else {
             strcpy(y->chave[y->nchaves], primeira_z);
+            y->offset_chaves[y->nchaves] = z_d->offset_chaves[0];
             y->nchaves++;
         }
 
         for (int j = 0; j < z_d->nchaves - 1; j++) {
             strcpy(z_d->chave[j], z_d->chave[j + 1]);
-        }
 
-        if (!z_d->folha) {
+            if (z_d->folha) {
+                z_d->offset_chaves[j] = z_d->offset_chaves[j + 1];
+            }
+        }
+        if (z_d->folha){
+            z_d->offset_chaves[z_d->nchaves - 1] = -1;
+        }else{
             for (int j = 0; j < z_d->nchaves; j++) {
                 z_d->offset_filhos[j] = z_d->offset_filhos[j + 1];
             }
@@ -530,6 +561,11 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
         for (int j = y->nchaves; j > 0; j--) {
             strcpy(y->chave[j], y->chave[j - 1]);
         }
+        if (y->folha) { // se for folha, desloco também o offset dos elementos
+            for (int j = y->nchaves; j > 0; j--) {
+                y->offset_chaves[j] = y->offset_chaves[j - 1];
+            }
+        }
 
         if (!y->folha) {
             for (int j = y->nchaves + 1; j > 0; j--) {
@@ -540,7 +576,9 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
             y->offset_filhos[0] = z_e->offset_filhos[z_e->nchaves];
         } else {
             strcpy(y->chave[0], ultima_z);
+            y->offset_chaves[0] = z_e->offset_chaves[z_e->nchaves - 1];
             strcpy(no->chave[i - 1], ultima_z);
+            z_e->offset_chaves[z_e->nchaves - 1] = -1;
         }
         
         y->nchaves++;
@@ -565,6 +603,10 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
             }
             for (j = 0; j < z_d->nchaves; j++) {
                 strcpy(y->chave[pos + j], z_d->chave[j]);
+
+                if (y->folha) {
+                    y->offset_chaves[pos + j] = z_d->offset_chaves[j];
+                }
             }
             if (!y->folha) {
                 for (j = 0; j <= z_d->nchaves; j++) {
@@ -601,6 +643,10 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
 
             for (j = 0; j < y->nchaves; j++) {
                 strcpy(z_e->chave[pos + j], y->chave[j]);
+
+                if (z_e->folha) {
+                    z_e->offset_chaves[pos + j] = y->offset_chaves[j];
+                }
             }
 
             if (!z_e->folha) {
@@ -675,13 +721,14 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
     liberar_no(no, t);
     return ret;
 }
-void TARVBM_BIN_remove(TARVBM_BIN *arvore, char *chave){
-    if (!arvore || !chave) return;
-    if (arvore->raiz_offset < 0) return;
-    if (TARVBM_BIN_busca(arvore, chave) == -1) return;
+OFFSET TARVBM_BIN_remove(TARVBM_BIN *arvore, char *chave){
+    if (!arvore || !chave) return -1;
+    if (arvore->raiz_offset < 0) return -1;
+    if (TARVBM_BIN_busca(arvore, chave) == -1) return -1;
 
-    remover(arvore, arvore->raiz_offset, chave, arvore->t);
+    OFFSET ret = remover(arvore, arvore->raiz_offset, chave, arvore->t);
     escrever_metadata(arvore);
+    return ret; //retorna o offset do elemento retirado no arquivo dele
 }
 
 
