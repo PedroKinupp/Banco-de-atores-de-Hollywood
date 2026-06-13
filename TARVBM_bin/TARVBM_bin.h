@@ -28,11 +28,6 @@ typedef struct {
     long raiz_offset;
 } TARVBM_BIN;
 
-void escrever_dados_arquivo(NO_BIN *no, int t);
-void gerar_nome_folha(OFFSET offset, char *saida);
-NO_BIN *ler_folha_arquivo(const char *nome, int t);
-void destruir_no(NO_BIN *no, int t);
-
 #endif
 
 // Operações básicas
