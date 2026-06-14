@@ -49,6 +49,10 @@ OFFSET TARVBM_BIN_busca(TARVBM_BIN *arvore, const char *chave);
 void TARVBM_BIN_insere(TARVBM_BIN *arvore, const char *chave, OFFSET offset_pessoa);
 OFFSET TARVBM_BIN_remove(TARVBM_BIN *arvore, char *chave);
 
+//operações com pessoas
+void TARVBM_BIN_insere_pessoa(TARVBM_BIN *arvore, PESSOA *p);
+void TARVBM_BIN_remove_pessoa(TARVBM_BIN *arvore, PESSOA *p);
+
 // Utilitários
 void TARVBM_BIN_imprime(TARVBM_BIN *arvore);
 void TARVBM_BIN_imprime_todos(TARVBM_BIN* avr);

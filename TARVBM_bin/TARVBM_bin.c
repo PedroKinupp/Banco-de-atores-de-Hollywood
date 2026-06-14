@@ -687,10 +687,8 @@ OFFSET remover(TARVBM_BIN *arv, OFFSET offset_no, const char *chave, int t){
         liberar_no(y, t);
     }
 
-    /*
-     * Se o nó atual é a raiz e ficou sem chaves após fusão,
-     * a nova raiz deve ser o primeiro filho.
-     */
+    //Se o nó atual é a raiz e ficou sem chaves após fusão, a nova raiz deve ser o primeiro filho.
+     
     if (no->nchaves == 0 && no->offset == arv->raiz_offset) {
         OFFSET nova_raiz = no->offset_filhos[0];
 
@@ -832,14 +830,22 @@ void TARVBM_BIN_imprime_todos(TARVBM_BIN* arv){
     liberar_no(aux, arv->t);
 
     while (f) {
+        printf("=================\n");
         printf("\nFolha offset %ld | arquivo: %s\n", f->offset, f->folha_nome);
 
+        printf("\nNumero de chaves: %ld\n", f->nchaves);
+        printf("offset das chaves: ");
+        for (int i = 0; i < f->nchaves; i++) {
+            printf("%d, ", f->offset_chaves[i]);
+        }
+        printf("Chaves: \n");
         for (int i = 0; i < f->nchaves; i++) {
             printf("%s, ", f->chave[i]);
         }
 
         printf("\nprox_folha_nome: %s", f->prox_folha_nome);
         printf("\nTamanho do arquivo: %ld bytes\n", tamanho_arquivo(f->folha_nome));
+        printf("\n");
 
         char prox_nome[MAX_TAM_NOME];
         strcpy(prox_nome, f->prox_folha_nome);
@@ -855,11 +861,8 @@ void TARVBM_BIN_imprime_todos(TARVBM_BIN* arv){
         NO_BIN *prox_principal = ler_no(arv->arquivo, prox_offset, arv->t);
         if (!prox_principal) break;
 
-        /*
-        * IMPORTANTE:
-        * pega os dados pelo arquivo externo,
-        * mas mantém o encadeamento vindo do nó principal.
-        */
+      
+        //pega os dados pelo arquivo externo, mas mantém o encadeamento vindo do nó principal.
         f = ler_dados_folha(prox_principal, arv->t);
 
         if (f) {
@@ -868,4 +871,47 @@ void TARVBM_BIN_imprime_todos(TARVBM_BIN* arv){
 
         liberar_no(prox_principal, arv->t);
     }
+}
+
+void TARVBM_BIN_insere_pessoa(TARVBM_BIN *arvore, PESSOA *p){
+    if (!arvore || !p) return;
+
+    if (TARVBM_BIN_busca(arvore, p->nome) != -1) {
+        return;
+    }
+
+    FILE *fp = fopen("PESSOAS", "ab");
+    if (!fp) return;
+
+    fseek(fp, 0, SEEK_END);
+    OFFSET offset_pessoa = ftell(fp);
+
+    fwrite(p, sizeof(PESSOA), 1, fp);
+    fclose(fp);
+
+    TARVBM_BIN_insere(arvore, p->nome, offset_pessoa);
+}
+
+void TARVBM_BIN_remove_pessoa(TARVBM_BIN *arvore, PESSOA *pessoa){
+    if (!arvore || !pessoa) return;
+
+    char *chave = pessoa->nome;
+    OFFSET offset = TARVBM_BIN_remove(arvore, chave);
+    if(offset == -1) return;
+
+    FILE *fp = fopen("PESSOAS", "r+b");
+    if (!fp) return;
+
+    PESSOA p;
+
+    fseek(fp, offset, SEEK_SET);
+    fread(&p, sizeof(PESSOA), 1, fp);
+
+    strcpy(p.nome, "*REMOVIDO*");
+    p.data_nascimento = -1;
+
+    fseek(fp, offset, SEEK_SET);
+    fwrite(&p, sizeof(PESSOA), 1, fp);
+
+    fclose(fp);
 }
