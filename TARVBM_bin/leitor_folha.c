@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "TARVBM_bin.h"
 
 typedef int OFFSET;
 
@@ -23,6 +24,7 @@ void ler_folha(const char *nome_arquivo, int t){
 
     fread(&nchaves, sizeof(int), 1, fp);
 
+    printf("======================\n");
     printf("Arquivo: %s\n", nome_arquivo);
     printf("nchaves: %d\n\n", nchaves);
 
@@ -39,8 +41,9 @@ void ler_folha(const char *nome_arquivo, int t){
     printf("\nchaves:\n");
     for(int i = 0; i < nchaves; i++){
         fread(chave, sizeof(char), MAX_TAM_CHAVE, fp);
-        printf("[%d] %s | offset_pessoa: %d\n", i, chave, offset_chaves[i]);
+        printf("[%d] %s | offset no arq pessoa: %d\n", i, chave, offset_chaves[i]);
     }
+    printf("======================");
 
     free(offset_chaves);
     fclose(fp);
@@ -48,8 +51,11 @@ void ler_folha(const char *nome_arquivo, int t){
 
 int main(){
     int t = 2;
+    char nome[MAX_TAM_NOME];
 
-    ler_folha("folha_1608.bin", t);
+    printf("Digite a folha que deseja averiguar: ");
+    scanf("%s", nome);
+    ler_folha(nome, t);
 
     return 0;
 }
