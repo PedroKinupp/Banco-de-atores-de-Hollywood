@@ -1,4 +1,5 @@
 #include "TARVBM_bin.h"
+#include <string.h>
 
 void imprimir_tam_no(int t){
     printf("===========================\n");
@@ -19,6 +20,8 @@ void imprimir_tam_no(int t){
 int main(){
     TARVBM_BIN * arvore = TARVBM_BIN_abrir("ARVORE");
     int opcao;
+    int tam = 64;
+    char nome[MAX_TAM_NOME];
 
     printf("O que deseja fazer?\n");
     while (1) {
@@ -26,7 +29,7 @@ int main(){
         printf("1 - Inserir\n");
         printf("2 - Remover\n");
         printf("3 - Imprimir arvore\n");
-        printf("4 - Imprimir todos\n");
+        printf("4 - Imprimir folhas\n");
         printf("5 - Verificar tamanho do no\n");
         printf("-1 - Sair\n");
         printf("Opcao: ");
@@ -38,11 +41,20 @@ int main(){
 
         switch (opcao) {
             case 1:
-                printf("Inserindo...\n");
+                printf("Digite alguem para inserir\n");
+                scanf("%s", nome);
+                tam = tam + 12;
+                PESSOA *p = malloc(sizeof(PESSOA));
+                strcpy(p->nome,nome);
+                p->data_nascimento = 2006;
+                TARVBM_BIN_insere_pessoa(arvore, p);
+                free(p);
                 break;
 
             case 2:
-                printf("Removendo...\n");
+                printf("Digite alguem para remover\n");
+                scanf("%s", nome);
+                TARVBM_BIN_remove(arvore, nome);
                 break;
 
             case 3:
