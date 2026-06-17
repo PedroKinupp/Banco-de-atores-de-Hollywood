@@ -43,12 +43,12 @@ int main(){
 
         switch (opcao) {
             case 1: {
-                printf("Nome da árvore: ");
+                printf("Nome da arvore: ");
                 scanf("%31s", arq);
                 FILE *f = fopen(arq, "rb");
                 if (f) { // Verifica se o arquivo já existe
                     fclose(f);
-                    printf("Erro: já existe uma árvore com esse nome.\n");
+                    printf("Erro: ja existe uma arvore com esse nome.\n");
                     break;
                 }
                 printf("Digite o t: ");
@@ -71,7 +71,7 @@ int main(){
                 scanf("%31s", arq);
                 FILE *f = fopen(arq, "rb");
                 if (!f) { // Verifica se o arquivo existe
-                    printf("Erro: árvore não encontrada.\n");
+                    printf("Erro: arvore não encontrada.\n");
                     break;
                 }
                 fclose(f);
@@ -81,9 +81,9 @@ int main(){
                 }
                 arvore = TARVBM_BIN_abrir(arq);
                 if (!arvore)
-                    printf("Erro ao abrir a árvore.\n");
+                    printf("Erro ao abrir a arvore.\n");
                 else
-                    printf("Árvore aberta com sucesso.\n");
+                    printf("Arvore aberta com sucesso.\n");
                 break;
             }
             case 3: {
@@ -106,7 +106,7 @@ int main(){
             }
             case 4: {
                 if (!arvore) {
-                    printf("Erro: nenhuma árvore aberta.\n");
+                    printf("Erro: nenhuma arvore aberta.\n");
                     break;
                 }
                 printf("Digite alguem para remover: ");
@@ -124,7 +124,7 @@ int main(){
             }
             case 5:
                 if (!arvore) {
-                    printf("Erro: nenhuma árvore aberta.\n");
+                    printf("Erro: nenhuma arvore aberta.\n");
                     break;
                 }
                 printf("Imprimindo arvore...\n");
@@ -134,7 +134,7 @@ int main(){
             case 6:
                 printf("Imprimindo todos...\n");
                 if (!arvore) {
-                    printf("Erro: nenhuma árvore aberta.\n");
+                    printf("Erro: nenhuma arvore aberta.\n");
                     break;
                 }
                 TARVBM_BIN_imprime_todos(arvore);
@@ -143,7 +143,7 @@ int main(){
             case 7:
                 printf("imprimindo tamanho do no...\n");
                 if (!arvore) {
-                    printf("Erro: nenhuma árvore aberta.\n");
+                    printf("Erro: nenhuma arvore aberta.\n");
                     break;
                 }
                 imprimir_tam_no(arvore->t);
