@@ -11,16 +11,16 @@ typedef int OFFSET;
 #define MAX_TAM_TAGLINE 200
 
 typedef struct no_bin {
-    OFFSET offset;
+    OFFSET offset; //typedef int OFFSET;
     int nchaves;
     int folha;
 
-    char **chave;
-    OFFSET *offset_chaves;
-    OFFSET *offset_filhos;
+    char **chave; //vetor de tamanho 2 * t -1
+    OFFSET *offset_chaves; //vetor de tamanho 2 * t -1
+    OFFSET *offset_filhos; //vetor de tamanho 2 * t
 
-    char *folha_nome;
-    char *prox_folha_nome;
+    char *folha_nome; //MAX_TAM_NOME 32
+    char *prox_folha_nome; //MAX_TAM_NOME 32
 } NO_BIN;
 
 typedef struct {

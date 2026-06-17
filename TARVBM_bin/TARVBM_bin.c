@@ -754,6 +754,10 @@ void imprimir_recursivo(FILE *arq, OFFSET offset, int andar, int t) {
 }
 
 void TARVBM_BIN_imprime(TARVBM_BIN *arvore) {
+    if(!arvore){
+        printf("\nÁrvore vazia\n");
+        return;
+    }
     printf("\n=== Arvore B+ em Memoria Secundaria ===\n");
     imprimir_recursivo(arvore->arquivo, arvore->raiz_offset, 0, arvore->t);
     printf("\n");
