@@ -2,7 +2,7 @@
 #include <string.h>
 
 void imprimir_tam_no(int t){
-    printf("===========================\n");
+    printf("---------------\n");
     printf("sizeof(int): %zu\n", sizeof(int));
     printf("sizeof(OFFSET): %zu\n", sizeof(OFFSET));
     printf("MAX_TAM_NOME: %d\n", MAX_TAM_NOME);
@@ -14,7 +14,7 @@ void imprimir_tam_no(int t){
         + (2 * t - 1) * sizeof(OFFSET)   // offset_chaves
         + (2 * t) * sizeof(OFFSET)       // offset_filhos
     );
-    printf("===========================\n");
+    printf("---------------\n");
 }
 
 int main(){
@@ -26,6 +26,7 @@ int main(){
 
     printf("O que deseja fazer?\n");
     while (1) {
+        printf("=================================\n");
         printf("1 - Criar Arvore\n");
         printf("2 - Abrir Arvore\n");
         printf("3 - Inserir\n");
@@ -67,11 +68,11 @@ int main(){
                 break;
             }
             case 2: {
-                printf("Escreva o nome da árvore que deseja abrir: ");
+                printf("Escreva o nome da arvore que deseja abrir: ");
                 scanf("%31s", arq);
                 FILE *f = fopen(arq, "rb");
                 if (!f) { // Verifica se o arquivo existe
-                    printf("Erro: arvore não encontrada.\n");
+                    printf("Erro: arvore nao encontrada.\n");
                     break;
                 }
                 fclose(f);
@@ -88,7 +89,7 @@ int main(){
             }
             case 3: {
                 if (!arvore) {
-                    printf("Erro: nenhuma árvore aberta.\n");
+                    printf("Erro: nenhuma arvore aberta.\n");
                     break;
                 }
                 printf("Digite alguem para inserir: ");

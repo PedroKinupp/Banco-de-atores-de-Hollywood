@@ -61,7 +61,7 @@ void liberar_no(NO_BIN *no, int t) {
         free(no);
     }
 }
-NO_BIN* criar_no(long offset, int t, int folha) {
+NO_BIN* criar_no(OFFSET offset, int t, int folha) {
     int i;
     int max_chaves = 2 * t - 1;
     int max_filhos = 2 * t;
@@ -186,10 +186,23 @@ void destruir_no(NO_BIN *no, int t) {
 
     liberar_no(no, t);
 }
+void criar_pasta(const char *nome) {
+    MKDIR(nome);
+}
+
 
 //criar, abrir e fechar
 TARVBM_BIN* TARVBM_BIN_criar(const char *nome_arquivo, int t){
     TARVBM_BIN *arv = (TARVBM_BIN*)malloc(sizeof(TARVBM_BIN));
+    
+    criar_pasta(nome_arquivo);
+
+    if (CHDIR(nome_arquivo) != 0) {
+        printf("Erro ao entrar na pasta da arvore\n");
+        free(arv);
+        return NULL;
+    }
+
     arv->nome_arquivo = (char*)malloc(strlen(nome_arquivo) + 1);
     strcpy(arv->nome_arquivo, nome_arquivo);
     arv->t = t;
@@ -237,6 +250,7 @@ void TARVBM_BIN_fechar(TARVBM_BIN *arv) {
         }
         free(arv->nome_arquivo);
         free(arv);
+        CHDIR("..");
     }
 }
 
@@ -782,12 +796,12 @@ int TARVBM_num_folhas(TARVBM_BIN* arv){
     return contador;
 }
 
-long tamanho_arquivo(const char *nome){
+OFFSET tamanho_arquivo(const char *nome){
     FILE *f = fopen(nome, "rb");
     if (!f) return -1;
 
     fseek(f, 0, SEEK_END);
-    long tam = ftell(f);
+    OFFSET tam = ftell(f);
 
     fclose(f);
     return tam;
@@ -842,6 +856,7 @@ void TARVBM_BIN_imprime_todos(TARVBM_BIN* arv){
         for (int i = 0; i < f->nchaves; i++) {
             printf("%d, ", f->offset_chaves[i]);
         }
+        printf("\n");
         printf("Chaves: \n");
         for (int i = 0; i < f->nchaves; i++) {
             printf("%s, ", f->chave[i]);

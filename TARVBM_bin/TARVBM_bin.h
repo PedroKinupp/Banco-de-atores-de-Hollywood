@@ -2,6 +2,16 @@
 #define TARVBM_BIN_H
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _WIN32
+    #include <direct.h>
+    #define CHDIR(path) _chdir(path)
+    #define MKDIR(path) _mkdir(path)
+#else
+    #include <unistd.h>
+    #include <sys/stat.h>
+    #define CHDIR(path) chdir(path)
+    #define MKDIR(path) mkdir(path, 0777)
+#endif
 
 typedef int OFFSET;
 
