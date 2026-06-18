@@ -285,8 +285,9 @@ OFFSET busca_recursiva(FILE *arq, OFFSET offset, const char *chave, int t) {
     }
     if (no->folha) {
         if (i > 0 && strcmp(chave, no->chave[i - 1]) == 0) {
+            OFFSET offset_pessoa = no->offset_chaves[i - 1];
             liberar_no(no, t);
-            return offset; // offset da folha onde está a chave
+            return offset_pessoa; // offset da pessoa no arquivo PESSOAS
         }
 
         liberar_no(no, t);

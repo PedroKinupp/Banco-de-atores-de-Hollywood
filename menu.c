@@ -24,6 +24,14 @@ void imprimir_tam_no(int t){
     printf("---------------\n");
 }
 
+void ler_linha(char *str, int tamanho) {// Descarta caracteres restantes no buffer (inclusive '\n')
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+
+    if (fgets(str, tamanho, stdin) != NULL) {// Lê a linha
+        str[strcspn(str, "\n")] = '\0';// Remove o '\n' final, se existir
+    }
+}
 void remover_quebra(char *s) {
     s[strcspn(s, "\r\n")] = '\0';
 }
@@ -211,8 +219,9 @@ int main(){
         printf("5 - Imprimir arvore\n");
         printf("6 - Imprimir folhas\n");
         printf("7 - Verificar tamanho do no\n");
-        printf("8 - Checar Hash\n");
+        printf("8 - Buscar Ator por nome\n");
         printf("9 - Preencher arvore\n");
+        printf("0 - Checar Hash\n");
         printf("-1 - Sair\n");
         printf("Opcao: ");
 
@@ -269,7 +278,7 @@ int main(){
                     break;
                 }
                 printf("Digite alguem para inserir: ");
-                scanf("%31s", nome);
+                ler_linha(nome, MAX_TAM_NOME);
                 printf("Digite a data de nascimento: ");
                 scanf("%d", &data);
                 PESSOA *p = malloc(sizeof(PESSOA));
@@ -290,7 +299,7 @@ int main(){
                     break;
                 }
                 printf("Digite alguem para remover: ");
-                scanf("%31s", nome);
+                ler_linha(nome, MAX_TAM_NOME);
                 PESSOA *p = malloc(sizeof(PESSOA));
                 if (!p) {
                     printf("Erro de memoria.\n");
@@ -330,11 +339,27 @@ int main(){
                 break;
             
             case 8:
-                if (arvore) {
-                    TARVBM_BIN_fechar(arvore);
-                    arvore = NULL;
+                printf("Digite alguem para buscar: ");
+                ler_linha(nome, MAX_TAM_NOME);
+                OFFSET offset = TARVBM_BIN_busca(arvore, nome);
+                if (offset == -1) {
+                    printf("Pessoa nao encontrada.\n");
+                    break;
                 }
-                manipular_hash();
+                printf("%d\n", offset);
+                FILE * fp = fopen("PESSOAS", "rb");
+                if (!fp) {
+                    printf("Erro ao abrir arquivo PESSOAS.\n");
+                    break;
+                }
+                fseek(fp, offset, SEEK_SET);
+                PESSOA p;
+                fread(&p, sizeof(PESSOA), 1, fp);
+                printf("--------\n");
+                printf("Nome: %s\n", p.nome);
+                printf("Data de nascimento: %d\n", p.data_nascimento);
+                printf("--------\n");
+                fclose(fp);
                 break;
 
             case 9:
@@ -353,7 +378,14 @@ int main(){
                 ler_arquivo_inserir(arvore, "../nodes.txt");
                 printf("Arquivo carregado com sucesso!\n");
                 break;
-                
+            
+            case 0:
+                if (arvore) {
+                    TARVBM_BIN_fechar(arvore);
+                    arvore = NULL;
+                }
+                manipular_hash();
+                break;
 
             default:
                 printf("Opcao invalida!\n");
