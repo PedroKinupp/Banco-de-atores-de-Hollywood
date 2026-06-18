@@ -877,7 +877,7 @@ void TARVBM_BIN_imprime_todos(TARVBM_BIN* arv){
             printf("%d, ", f->offset_chaves[i]);
         }
         printf("\n");
-        printf("Chaves: \n");
+        printf("Chaves: ");
         for (int i = 0; i < f->nchaves; i++) {
             printf("%s, ", f->chave[i]);
         }
