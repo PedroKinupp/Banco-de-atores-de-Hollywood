@@ -201,13 +201,13 @@ void hash(void) {
     printf("O que deseja fazer?\n");
     while (1) {
         printf("=================================\n");
-        printf("1 - Iniciar hash de Relações\n");
-        printf("2 - Cálculo de Hash\n");
-        printf("3 - Inserir relação\n");
-        printf("4 - Remover relação\n");
+        printf("1 - Iniciar hash de Relacoes\n");
+        printf("2 - Calculo de Hash\n");
+        printf("3 - Inserir relacao\n");
+        printf("4 - Remover relacao\n");
         printf("5 - Listar cast de um filme\n");
         printf("6 - Busca Individual\n");
-        printf("-1 - Sair das opções de Hash\n");
+        printf("-1 - Sair das opcoes de Hash\n");
         printf("Opcao: ");
 
         if (scanf("%d", &opcao) != 1) {
@@ -461,10 +461,10 @@ int main(){
                 fseek(fp, offset, SEEK_SET);
                 PESSOA p;
                 fread(&p, sizeof(PESSOA), 1, fp);
-                printf("--------\n");
+                printf("\n");
                 printf("Nome: %s\n", p.nome);
                 printf("Data de nascimento: %d\n", p.data_nascimento);
-                printf("--------\n");
+                printf("\n");
                 fclose(fp);
                 break;
 
@@ -491,7 +491,9 @@ int main(){
                     arvore = NULL;
                 }
                 hash();
+                printf("\n");
                 printf("E neccessário abrir uma Arvore novamente\n");
+                printf("\n");
                 break;
 
             default:
