@@ -15,8 +15,8 @@
 
 typedef int OFFSET;
 
-#define MAX_TAM_NOME 32
-#define MAX_NOME_ARQ 32
+#define MAX_TAM_NOME 64
+#define MAX_NOME_ARQ 64
 #define MAX_TAM_CHAVE 100
 #define MAX_TAM_TAGLINE 200
 

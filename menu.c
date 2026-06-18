@@ -118,24 +118,18 @@ void ler_arquivo_inserir(TARVBM_BIN *arvore, const char *nome_arquivo) {
 
 int manipular_hash(void) {
 
-    /* --------------------------------------------------------
-     * 1. Inicializa a tabela zerada
-     * ------------------------------------------------------ */
+    //1. Inicializa a tabela zerada
     FH_inicializa(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA);
 
-    /* --------------------------------------------------------
-     * 2. Carrega o Relationships.txt
-     *    (O dataset não possui ano → 0 como padrão)
-     * ------------------------------------------------------ */
+    //2. Carrega o Relationships.txt
+    //(O dataset não possui ano → 0 como padrão)
     printf("Carregando arquivo...\n");
     int n = FH_carregar_arquivo(ARQUIVO_HASH, ARQUIVO_DADOS,
                                 TAM_TABELA, "Relationships.txt", 0);
     printf("Registros inseridos: %d\n\n", n);
 
-    /* --------------------------------------------------------
-     * 3. Demonstração: CalculoDeHash
-     *    Pessoas do mesmo filme → mesmo bucket
-     * ------------------------------------------------------ */
+    //3. Demonstração: CalculoDeHash
+    //Pessoas do mesmo filme → mesmo bucket
     printf("=== CalculoDeHash ===\n");
     int h1 = CalculoDeHash("The Matrix", 0, TAM_TABELA);
     int h2 = CalculoDeHash("The Matrix", 0, TAM_TABELA);
@@ -144,17 +138,13 @@ int manipular_hash(void) {
     printf("Hash(\"The Matrix\", 0)     = %d  \n", h2);
     printf("Hash(\"A Few Good Men\", 0) = %d  \n\n", h3);
 
-    /* --------------------------------------------------------
-     * 4. Listar cast completo de alguns filmes
-     * ------------------------------------------------------ */
+    //4. Listar cast completo de alguns filmes
     FH_listar_filme(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA, "The Matrix", 0);
     putchar('\n');
     FH_listar_filme(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA, "A Few Good Men", 0);
     putchar('\n');
 
-    /* --------------------------------------------------------
-     * 5. Busca individual
-     * ------------------------------------------------------ */
+    // 5. Busca individual
     printf("=== Buscas individuais ===\n");
     TF resultado;
     const char *filmes[] = {"The Matrix", "A Few Good Men", "Top Gun"};
@@ -175,9 +165,7 @@ int manipular_hash(void) {
     printf("Tom Hanks em \"The Matrix\": %s\n\n",
            achou ? "ENCONTRADO" : "NAO ENCONTRADO");
 
-    /* --------------------------------------------------------
-     * 6. Remoção
-     * ------------------------------------------------------ */
+    //6. Remoção
     printf("=== Remoção ===\n");
     int ret = FH_retira_pessoa(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA,
                                "The Matrix", 0, "Hugo Weaving");
@@ -187,9 +175,7 @@ int manipular_hash(void) {
     FH_listar_filme(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA, "The Matrix", 0);
     putchar('\n');
 
-    /* --------------------------------------------------------
-     * 7. Re-inserção (reaproveitamento de slot)
-     * ------------------------------------------------------ */
+    //7. Re-inserção (reaproveitamento de slot)
     printf("=== Re-inserção de Hugo Weaving ===\n");
     FH_insere(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA,
               "The Matrix", 0,
@@ -197,9 +183,7 @@ int manipular_hash(void) {
     FH_listar_filme(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA, "The Matrix", 0);
     putchar('\n');
 
-    /* --------------------------------------------------------
-     * 8. Inserção de um registro novo (não estava no .txt)
-     * ------------------------------------------------------ */
+    //8. Inserção de um registro novo (não estava no .txt)
     printf("=== Inserção manual de novo registro ===\n");
     FH_insere(ARQUIVO_HASH, ARQUIVO_DADOS, TAM_TABELA,
               "The Matrix", 0,

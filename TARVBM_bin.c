@@ -194,7 +194,8 @@ void criar_pasta(const char *nome) {
 //criar, abrir e fechar
 TARVBM_BIN* TARVBM_BIN_criar(const char *nome_arquivo, int t){
     TARVBM_BIN *arv = (TARVBM_BIN*)malloc(sizeof(TARVBM_BIN));
-    
+    if (!arv) return NULL;
+
     criar_pasta(nome_arquivo);
 
     if (CHDIR(nome_arquivo) != 0) {
@@ -203,19 +204,25 @@ TARVBM_BIN* TARVBM_BIN_criar(const char *nome_arquivo, int t){
         return NULL;
     }
 
-    arv->nome_arquivo = (char*)malloc(strlen(nome_arquivo) + 1);
-    strcpy(arv->nome_arquivo, nome_arquivo);
+    arv->nome_arquivo = malloc(strlen("arvore.bin") + 1);
+    if (!arv->nome_arquivo) {
+        CHDIR("..");
+        free(arv);
+        return NULL;
+    }
+    strcpy(arv->nome_arquivo, "arvore.bin");
     arv->t = t;
-    arv->raiz_offset = 0;
+    arv->raiz_offset = META_SIZE;
 
     arv->arquivo = fopen(arv->nome_arquivo, "w+b");
     if (!arv->arquivo) {
         printf("Erro ao abrir arquivo\n");
         free(arv->nome_arquivo);
         free(arv);
+        CHDIR("..");
         return NULL;
     }
-    arv->raiz_offset = META_SIZE;
+
     escrever_metadata(arv);
 
     NO_BIN *raiz = criar_no(arv->raiz_offset, t, 1);
@@ -226,19 +233,31 @@ TARVBM_BIN* TARVBM_BIN_criar(const char *nome_arquivo, int t){
 
     return arv;
 }
-TARVBM_BIN* TARVBM_BIN_abrir(const char *nome_arquivo) {
-    TARVBM_BIN *arv = (TARVBM_BIN*)malloc(sizeof(TARVBM_BIN));
-    arv->nome_arquivo = (char*)malloc(strlen(nome_arquivo) + 1);
-    strcpy(arv->nome_arquivo, nome_arquivo);
-    
+TARVBM_BIN* TARVBM_BIN_abrir(const char *nome_pasta) {
+    TARVBM_BIN *arv = malloc(sizeof(TARVBM_BIN));
+    if (!arv) return NULL;
+
+    if (CHDIR(nome_pasta) != 0) {
+        printf("Erro ao entrar na pasta da arvore\n");
+        free(arv);
+        return NULL;
+    }
+
+    arv->nome_arquivo = malloc(strlen("arvore.bin") + 1);
+    if (!arv->nome_arquivo) {
+        CHDIR("..");
+        free(arv);
+        return NULL;
+    }
+    strcpy(arv->nome_arquivo, "arvore.bin");
     arv->arquivo = fopen(arv->nome_arquivo, "r+b");
     if (!arv->arquivo) {
         printf("Erro ao abrir arquivo\n");
         free(arv->nome_arquivo);
         free(arv);
+        CHDIR("..");
         return NULL;
     }
-    
     ler_metadata(arv);
     return arv;
 }
